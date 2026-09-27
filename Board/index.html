@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mood</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Mood</span>
+    <div class="month-nav">
+      <button class="nav-btn" id="prev-month" type="button" aria-label="Previous month">&#8249;</button>
+      <h1 class="month-title" id="month-title">October 2026</h1>
+      <button class="nav-btn" id="next-month" type="button" aria-label="Next month">&#8250;</button>
+      <button class="today-btn" id="today-btn" type="button">Today</button>
+    </div>
+    <div class="theme-editor">
+      <label for="theme-input">Theme</label>
+      <input class="theme-input" id="theme-input" type="text" placeholder="Add a guiding phrase&hellip;" maxlength="140" autocomplete="off">
+    </div>
+  </header>
+
+  <main class="board" id="board"></main>
+
+  <script src="calendar.js"></script>
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

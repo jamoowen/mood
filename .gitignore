@@ -1,0 +1,17 @@
+# macOS filesystem metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Build output
+build/
+DerivedData/
+
+# Swift / Xcode artifacts
+*.o
+*.swiftmodule
+*.swiftdeps
+*.dSYM
+xcuserdata/
+*.xcuserstate
