@@ -6,7 +6,6 @@
 
   var SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var DOW_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   var state = {
     data: null,
@@ -76,6 +75,19 @@
     return formatShort(first) + ' \u2013 ' + formatShort(last);
   }
 
+  function roman(n) {
+    var table = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'],
+      [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+    var out = '';
+    for (var i = 0; i < table.length; i++) {
+      while (n >= table[i][0]) {
+        out += table[i][1];
+        n -= table[i][0];
+      }
+    }
+    return out;
+  }
+
   // ---- rendering ----
 
   function render() {
@@ -85,9 +97,11 @@
     var board = document.getElementById('board');
     board.textContent = '';
     board.appendChild(renderMonthlySection());
+    var weeks = el('div', 'weeks');
     C.weeksOfMonth(state.monthKey).forEach(function (week, index) {
-      board.appendChild(renderWeekSection(week, index));
+      weeks.appendChild(renderWeekSection(week, index));
     });
+    board.appendChild(weeks);
   }
 
   function monthlyHandlers(goal) {
@@ -106,22 +120,48 @@
     };
   }
 
+  function allDone(goals) {
+    return goals.length > 0 && goals.every(function (g) { return g.done; });
+  }
+
+  function syncGoals(list, done) {
+    Array.prototype.forEach.call(list.children, function (li) {
+      li.classList.toggle('is-done', done);
+      var cb = li.querySelector('.goal-check');
+      if (cb) cb.checked = done;
+    });
+  }
+
   function renderMonthlySection() {
     var month = S.ensureMonth(state.data, state.monthKey);
     var section = el('section', 'card month-card');
-
-    var header = el('header', 'section-header');
-    header.appendChild(el('h2', 'section-title', 'Monthly goals'));
-    header.appendChild(el('span', 'section-count', String(month.monthlyGoals.length)));
-    section.appendChild(header);
 
     var list = el('ul', 'goals');
     month.monthlyGoals.forEach(function (goal) {
       list.appendChild(renderGoal(goal, monthlyHandlers(goal)));
     });
+
+    var header = el('header', 'section-header');
+    header.appendChild(el('h2', 'section-title', 'Monthly Edicts'));
+    var actions = el('div', 'section-actions');
+    actions.appendChild(el('span', 'section-count', String(month.monthlyGoals.length)));
+    var monthDone = allDone(month.monthlyGoals);
+    var completeBtn = el('button', 'complete-btn' + (monthDone ? ' is-done' : ''), monthDone ? 'Undo' : 'Complete month');
+    completeBtn.type = 'button';
+    completeBtn.addEventListener('click', function () {
+      var done = S.toggleMonthComplete(state.data, state.monthKey);
+      persist();
+      syncGoals(list, done);
+      completeBtn.textContent = done ? 'Undo' : 'Complete month';
+      completeBtn.classList.toggle('is-done', done);
+    });
+    actions.appendChild(completeBtn);
+    header.appendChild(actions);
+    section.appendChild(header);
+
     section.appendChild(list);
 
-    var form = renderAddForm('Add a monthly goal');
+    var form = renderAddForm('Inscribe a monthly edict');
     bindAddForm(form, list, function (text) {
       return S.addMonthly(state.data, state.monthKey, text);
     }, monthlyHandlers);
@@ -133,41 +173,41 @@
   function renderWeekSection(week, index) {
     var section = el('section', 'card week-card');
 
-    var header = el('header', 'week-header');
-    header.appendChild(el('h2', 'week-range', weekRange(week)));
-    header.appendChild(el('span', 'week-index', 'Week ' + (index + 1)));
-    section.appendChild(header);
-
-    section.appendChild(renderDayStrip(week));
-    section.appendChild(el('div', 'week-goals-label', 'Weekly goals'));
-
-    var list = el('ul', 'goals');
     var weekly = S.ensureWeek(state.data, week.key);
+    var list = el('ul', 'goals');
     weekly.forEach(function (goal) {
       list.appendChild(renderGoal(goal, weeklyHandlers(week.key, goal)));
     });
+
+    var header = el('header', 'week-header');
+    header.appendChild(el('h2', 'week-range', weekRange(week)));
+    var actions = el('div', 'week-actions');
+    actions.appendChild(el('span', 'week-index', 'Week ' + roman(index + 1)));
+    var weekDone = allDone(weekly);
+    var completeBtn = el('button', 'complete-btn' + (weekDone ? ' is-done' : ''), weekDone ? 'Undo' : 'Complete');
+    completeBtn.type = 'button';
+    completeBtn.addEventListener('click', function () {
+      var done = S.toggleWeekComplete(state.data, week.key);
+      persist();
+      syncGoals(list, done);
+      completeBtn.textContent = done ? 'Undo' : 'Complete';
+      completeBtn.classList.toggle('is-done', done);
+    });
+    actions.appendChild(completeBtn);
+    header.appendChild(actions);
+    section.appendChild(header);
+
+    section.appendChild(el('div', 'week-goals-label', 'Weekly Duties'));
+
     section.appendChild(list);
 
-    var form = renderAddForm('Add a weekly goal');
+    var form = renderAddForm('Inscribe a weekly duty');
     bindAddForm(form, list, function (text) {
       return S.addWeekly(state.data, week.key, text);
     }, function (goal) { return weeklyHandlers(week.key, goal); });
     section.appendChild(form);
 
     return section;
-  }
-
-  function renderDayStrip(week) {
-    var todayKey = C.keyOf(new Date());
-    var strip = el('div', 'week-days');
-    week.days.forEach(function (d, i) {
-      var classes = 'day' + (d.inMonth ? '' : ' is-outside') + (d.key === todayKey ? ' is-today' : '');
-      var cell = el('div', classes);
-      cell.appendChild(el('span', 'day-dow', DOW_LABELS[i]));
-      cell.appendChild(el('span', 'day-num', String(d.dayNum)));
-      strip.appendChild(cell);
-    });
-    return strip;
   }
 
   function renderGoal(goal, handlers) {

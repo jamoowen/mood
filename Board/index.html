@@ -3,25 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mood</title>
+  <title>Mood — Carpe Diem</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <span class="brand">Mood</span>
+    <div class="brand">
+      <img class="brand-mark" src="assets/laurel.svg" alt="" aria-hidden="true">
+      <span class="brand-text">
+        <span class="brand-name">Mood</span>
+        <span class="brand-sub">S&#183;P&#183;Q&#183;R</span>
+      </span>
+    </div>
     <div class="month-nav">
       <button class="nav-btn" id="prev-month" type="button" aria-label="Previous month">&#8249;</button>
       <h1 class="month-title" id="month-title">October 2026</h1>
       <button class="nav-btn" id="next-month" type="button" aria-label="Next month">&#8250;</button>
-      <button class="today-btn" id="today-btn" type="button">Today</button>
+      <button class="today-btn" id="today-btn" type="button">Carpe Diem</button>
     </div>
     <div class="theme-editor">
       <label for="theme-input">Theme</label>
-      <input class="theme-input" id="theme-input" type="text" placeholder="Add a guiding phrase&hellip;" maxlength="140" autocomplete="off">
+      <input class="theme-input" id="theme-input" type="text" placeholder="Inscribe this month&#8217;s theme&hellip;" maxlength="140" autocomplete="off">
     </div>
   </header>
 
+  <div class="motto">
+    <p class="motto-kicker">Senatus Populusque Romanus</p>
+    <p class="motto-text">Fortis &#183; Fortuna &#183; Adiuvat</p>
+  </div>
+
   <main class="board" id="board"></main>
+
+  <footer class="footer">
+    <figure class="fresco">
+      <img src="assets/peacock.jpg" alt="Pompeii peacock fresco">
+      <figcaption>Peacock fresco &#183; Pompeii &#183; 1st century</figcaption>
+    </figure>
+    <div class="footer-seal">
+      <img class="footer-laurel" src="assets/laurel.svg" alt="" aria-hidden="true">
+      <span class="footer-motto">Fortis &#183; Fortuna &#183; Adiuvat</span>
+      <span class="footer-sub">S&#183;P&#183;Q&#183;R</span>
+    </div>
+  </footer>
 
   <script src="calendar.js"></script>
   <script src="store.js"></script>

@@ -7,7 +7,6 @@ final class WebViewController: NSObject, WKNavigationDelegate, WKUIDelegate, WKS
 
     private let bridge: FileBridge
     private let boardDirectory: URL
-    private let indexURL: URL
     private var watcher: FileWatcher?
     private var reloadWorkItem: DispatchWorkItem?
     private var ignoreGoalsUntil = Date.distantPast
@@ -15,13 +14,13 @@ final class WebViewController: NSObject, WKNavigationDelegate, WKUIDelegate, WKS
     init(boardDirectory: URL) {
         self.boardDirectory = boardDirectory
         self.bridge = FileBridge(boardDirectory: boardDirectory)
-        self.indexURL = boardDirectory.appendingPathComponent("index.html")
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
         let controller = WKUserContentController()
         configuration.userContentController = controller
+        configuration.setURLSchemeHandler(BoardSchemeHandler(root: boardDirectory), forURLScheme: "mood")
         let webView = WKWebView(frame: .zero, configuration: configuration)
         self.webView = webView
 
@@ -47,7 +46,7 @@ final class WebViewController: NSObject, WKNavigationDelegate, WKUIDelegate, WKS
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
         controller.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
-        webView.loadFileURL(indexURL, allowingReadAccessTo: boardDirectory)
+        webView.load(URLRequest(url: URL(string: "mood:///index.html")!))
     }
 
     private func startWatching() {
@@ -81,10 +80,8 @@ final class WebViewController: NSObject, WKNavigationDelegate, WKUIDelegate, WKS
     }
 
     private func isTrustedLocalURL(_ url: URL?) -> Bool {
-        guard let url = url, url.isFileURL else { return false }
-        let boardPath = boardDirectory.standardizedFileURL.path
-        let candidate = url.standardizedFileURL.path
-        return candidate == boardPath || candidate.hasPrefix(boardPath + "/")
+        guard let url = url else { return false }
+        return url.scheme == "mood"
     }
 
     // MARK: WKScriptMessageHandler

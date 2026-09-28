@@ -77,6 +77,22 @@
     data.weeks[weekKey] = ensureWeek(data, weekKey).filter(function (g) { return g.id !== id; });
   }
 
+  function toggleMonthComplete(data, monthKey) {
+    var goals = ensureMonth(data, monthKey).monthlyGoals;
+    if (goals.length === 0) return false;
+    var target = !goals.every(function (g) { return g.done; });
+    goals.forEach(function (g) { g.done = target; });
+    return target;
+  }
+
+  function toggleWeekComplete(data, weekKey) {
+    var goals = ensureWeek(data, weekKey);
+    if (goals.length === 0) return false;
+    var target = !goals.every(function (g) { return g.done; });
+    goals.forEach(function (g) { g.done = target; });
+    return target;
+  }
+
   window.MoodStore = {
     newId: newId,
     emptyData: emptyData,
@@ -90,6 +106,8 @@
     addWeekly: addWeekly,
     updateWeekly: updateWeekly,
     toggleWeekly: toggleWeekly,
-    removeWeekly: removeWeekly
+    removeWeekly: removeWeekly,
+    toggleMonthComplete: toggleMonthComplete,
+    toggleWeekComplete: toggleWeekComplete
   };
 })();
